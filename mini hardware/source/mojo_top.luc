@@ -1,0 +1,149 @@
+
+module mojo_top (
+    input clk,              // 50MHz clock
+    input rst_n,           // reset button (active low)
+    input io_button[5],
+    output led [4],         // 8 user controllable LEDs
+    input cclk,             // configuration clock, AVR ready when high
+    output spi_miso,            // AVR SPI MISO
+    input spi_ss,           // AVR SPI Slave Select
+    input spi_mosi,         // AVR SPI MOSI
+    input spi_sck,          // AVR SPI Clock
+    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    input avr_tx,           // AVR TX (FPGA RX)
+    output avr_rx,          // AVR RX (FPGA TX)
+    output a,
+    output b,
+    output ci,
+    input press,
+    input avr_rx_busy       // AVR RX buffer full
+  ) {
+  
+    sig rst;
+    .clk(clk){
+      reset_conditioner reset_cond;
+      .rst(rst) {
+        
+  //      blinker myBlinker;
+      }
+   //   .rst(rst){
+   //     fsm state = {START, STOP};
+   // }
+   // dff count [25];
+    }
+  dff counter[29](.clk(clk), .rst(rst));
+  fsm getstate(.clk(clk), .rst(rst)) = {START, STATE1, STATE2, STATE3, STATE4, STATE5, STATE6, STATE7};
+  always {
+    a = 0;
+    b = 0;
+    ci = 0;   
+    
+    if(counter.q[28]==0){
+        if(counter.q[27]==0){
+          if(counter.q[26]==0)getstate.d=getstate.START;
+          else{getstate.d=getstate.STATE1;}
+        }else{
+          if(counter.q[26]==0)getstate.d=getstate.STATE2;
+          else{getstate.d=getstate.STATE3;}
+        }
+      }else{
+        if(counter.q[27]==0){
+          if(counter.q[26]==0)getstate.d=getstate.STATE4;
+          else{getstate.d=getstate.STATE5;}
+        }else{
+          if(counter.q[26]==0)getstate.d=getstate.STATE6;
+          else{getstate.d=getstate.STATE7;}
+        }
+      }
+     counter.d=counter.q+1;
+    
+    case(getstate.q) {
+      getstate.START:
+          led[1] = 0;
+          led[2] = 0;
+          led[3] = 0;
+          a = 0;
+          b = 0;
+          ci = 0;
+        
+    
+      getstate.STATE1:
+          led[1] = 0;
+          led[2] = 0;
+          led[3] = 1;
+          a = 0;
+          b = 0;
+          ci = 1;
+    
+      getstate.STATE2:
+          led[1] = 0;
+          led[2] = 1;
+          led[3] = 0;
+          a = 0;
+          b = 1;
+          ci = 0;        
+    
+      getstate.STATE3:
+   //     if(press==0){
+     //     getstate.d = getstate.STATE4;  
+          led[1] = 0;
+          led[2] = 1;
+          led[3] = 1;
+          a = 0;
+          b = 1;
+          ci = 1;       
+   //     }
+    
+      getstate.STATE4:
+   //     if(press==0){
+   //       getstate.d = getstate.STATE5;  
+          led[1] = 1;
+          led[2] = 0;
+          led[3] = 0;
+          a = 1;
+          b = 0;
+          ci = 0;       
+   //     }
+    
+      getstate.STATE5:
+   //     if(press==0){
+   //       getstate.d = getstate.STATE6;  
+          led[1] = 1;
+          led[2] = 0;
+          led[3] = 1;
+          a = 1;
+          b = 0;
+          ci = 1;        
+  //      }
+    
+      getstate.STATE6:
+  //      if(press==0){
+   //       getstate.d = getstate.STATE7; 
+          led[1] = 1;
+          led[2] = 1;
+          led[3] = 0;         
+          a = 1;
+          b = 1;
+          ci = 0;
+  //      }
+    
+      getstate.STATE7:
+   //     if(press==0){
+  //        getstate.d = getstate.STATE8;  
+          led[1] = 1;
+          led[2] = 1;
+          led[3] = 1;
+          a = 1;
+          b = 1;
+          ci = 1;       
+  //      }
+    }
+    reset_cond.in = ~rst_n;
+    rst = reset_cond.out;
+    spi_miso = bz;
+ //   led[0] = myBlinker.blink;
+    led[0] = 0;
+    spi_channel = bzzzz;
+    avr_rx = bz;
+  }
+}

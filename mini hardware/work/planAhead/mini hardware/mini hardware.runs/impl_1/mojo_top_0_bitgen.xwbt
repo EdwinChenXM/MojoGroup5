@@ -1,0 +1,8 @@
+INTSTYLE=pa
+INFILE=E:\Mojo IDE\mini hardware\work\planAhead\mini hardware\mini hardware.runs\impl_1\mojo_top_0_routed.ncd
+OUTFILE=E:\Mojo IDE\mini hardware\work\planAhead\mini hardware\mini hardware.runs\impl_1\mojo_top_0.bit
+FAMILY=Spartan6
+PART=xc6slx9-2tqg144
+WORKINGDIR=E:\Mojo IDE\mini hardware\work\planAhead\mini hardware\mini hardware.runs\impl_1
+LICENSE=WebPack
+USER_INFO=211410044_0_0_133

@@ -1,0 +1,95 @@
+module whatstate (
+    input clk,  // clock
+    input rst,
+//    input mod,
+    input press,  // button
+    output a,
+    output b,
+    output ci
+  ) {
+  fsm getstate(.clk(clk), .rst(rst)) = {START, STATE1, STATE2, STATE3, STATE4, STATE5, STATE6, STATE7, STATE8};
+  var s;
+  var c;
+  always {
+    a = 0;
+    b = 0;
+    ci = 0;   
+    case(getstate.q) {
+      getstate.START:
+   //     if(press==1){
+    //      getstate.d = getstate.STATE1;  
+          a = 0;
+          b = 0;
+          ci = 0;
+          s = 0;
+          c = 0;
+   //     }
+    
+      getstate.STATE1:
+   //     if(press==1){
+    //      getstate.d = getstate.STATE2;  
+          a = 0;
+          b = 0;
+          ci = 1;
+          s = 1;
+          c = 0;
+   //     }
+    
+      getstate.STATE2:
+    //    if(press==0){
+   //       getstate.d = getstate.STATE3;  
+          a = 0;
+          b = 1;
+          ci = 0;
+   //     }
+    
+      getstate.STATE3:
+   //     if(press==0){
+     //     getstate.d = getstate.STATE4;  
+          a = 0;
+          b = 1;
+          ci = 1;
+   //     }
+    
+      getstate.STATE4:
+   //     if(press==0){
+   //       getstate.d = getstate.STATE5;  
+          a = 1;
+          b = 0;
+          ci = 0;
+   //     }
+    
+      getstate.STATE5:
+   //     if(press==0){
+   //       getstate.d = getstate.STATE6;  
+          a = 1;
+          b = 0;
+          ci = 1;
+  //      }
+    
+      getstate.STATE6:
+  //      if(press==0){
+   //       getstate.d = getstate.STATE7;  
+          a = 1;
+          b = 1;
+          ci = 0;
+  //      }
+    
+      getstate.STATE7:
+   //     if(press==0){
+  //        getstate.d = getstate.STATE8;  
+          a = 1;
+          b = 1;
+          ci = 1;
+  //      }
+    
+      getstate.STATE8:
+   //     if(press==0){
+  //        getstate.d = getstate.START;  
+          a = 0;
+          b = 0;
+          ci = 0;
+   //     }
+    }
+  }
+}

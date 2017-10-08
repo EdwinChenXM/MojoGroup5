@@ -1,0 +1,16 @@
+module blinker (
+  input clk,
+  input rst,
+  output blink
+){
+  
+ dff counter[26](#INIT(100), .clk(clk), .rst(rst));
+ always {
+   blink = counter.q[25]; 
+   counter.d = counter.q+1; 
+ //  for(i=0;i<1000000;i++){
+ //   e = 11;
+ //     }
+ }
+  
+}
