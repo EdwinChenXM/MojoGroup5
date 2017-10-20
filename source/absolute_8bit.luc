@@ -6,7 +6,7 @@ module absolute_8bit (
   always {
     case(a[7]){
       
-      1b1:out = ~a[7:0]+8b1;
+      1b1:out = ~(a[7:0]-8b1);
       1b0:out = a[7:0];  
       default:out = a[7:0];
       

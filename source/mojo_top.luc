@@ -28,6 +28,7 @@ module mojo_top (
     .rst(rst){   
     multi_seven_seg seg;
     oper_seg_display oper_seg;
+    
    
     }
     // The reset conditioner is used to synchronize the reset signal to the FPGA
@@ -35,6 +36,8 @@ module mojo_top (
     reset_conditioner reset_cond;
       
   }
+  
+  auto_test auto;
 
   adder_8bit adder;
   comparator_8bit comparator;
@@ -42,8 +45,12 @@ module mojo_top (
   shifter_8bit shifter;
   multiplier_8bit multiplier;
   absolute_8bit absolute;
+
   
   always {
+  
+    auto.rst_n = rst_n;
+    auto.clk = clk;
   
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
@@ -58,7 +65,8 @@ module mojo_top (
     io_sel = 4hf;           // select no digits
 
     alufn = io_dip[0][5:0]; //alufn values taken from 6 switches
-    io_led[1] = alufn;      
+    io_led[1] = auto.b;   
+    io_led[2] = auto.a;
     //assigning alufn values
     adder.alufn = alufn; 
     comparator.alufn = alufn;
@@ -100,24 +108,24 @@ module mojo_top (
     
     case(alufn[5:0]){
       6b000000: //adder addition mode
-        adder.a = io_dip[2];
-        adder.b = io_dip[1];
+        adder.a = auto.a;
+        adder.b = auto.b;
         io_led[0] = adder.out;
         led[0] = adder.z; 
         led[2] = adder.v;
         led[4] = adder.n;
         
       6b000001: //adder substraction mode
-        adder.a = io_dip[2];
-        adder.b = io_dip[1];
+        adder.a = auto.a;
+        adder.b = auto.b;
         io_led[0] = adder.out; 
         led[0] = adder.z; 
         led[2] = adder.v;
         led[4] = adder.n;
         
       6b110011: //compare equal mode
-        adder.a = io_dip[2][7:0];
-        adder.b = io_dip[1][7:0];
+        adder.a = auto.a;
+        adder.b = auto.b;
         comparator.z = adder.z;
         comparator.v = adder.v;
         comparator.n = adder.n;
@@ -128,8 +136,8 @@ module mojo_top (
         
                 
       6b110101: //compare less than mode
-        adder.a = io_dip[2];
-        adder.b = io_dip[1];
+        adder.a = auto.a;
+        adder.b = auto.b;
         comparator.z = adder.z;
         comparator.v = adder.v;
         comparator.n = adder.n;
@@ -139,8 +147,8 @@ module mojo_top (
         io_led[0] = comparator.out; 
            
       6b110111: //compare less than or equal to mode
-        adder.a = io_dip[2];
-        adder.b = io_dip[1];
+        adder.a = auto.a;
+        adder.b = auto.b;
         comparator.z = adder.z;
         comparator.v = adder.v;
         comparator.n = adder.n;
@@ -150,23 +158,23 @@ module mojo_top (
         io_led[0] = comparator.out;        
         
       6b011000: //boolean AND mode   
-        boolean.a = io_dip[2];
-        boolean.b = io_dip[1];
+        boolean.a = auto.a;
+        boolean.b = auto.b;
         io_led[0] = boolean.out;    
         
       6b011110: //boolean OR mode   
-        boolean.a = io_dip[2];
-        boolean.b = io_dip[1];
+        boolean.a = auto.a;
+        boolean.b = auto.b;
         io_led[0] = boolean.out; 
         
       6b010110: //boolean XOR mode   
-        boolean.a = io_dip[2];
-        boolean.b = io_dip[1];
+        boolean.a = auto.a;
+        boolean.b = auto.b;
         io_led[0] = boolean.out; 
         
       6b011010: //boolean "A" (LDR) mode   
-        boolean.a = io_dip[2];
-        boolean.b = io_dip[1];
+        boolean.a = auto.a;
+        boolean.b = auto.b;
         io_led[0] = boolean.out;         
         
       6b100000: //shif left mode                
@@ -185,12 +193,12 @@ module mojo_top (
         io_led[0] = shifter.out;    
         
       6b000010: //multiplier between A and B 
-        multiplier.a = io_dip[2];
-        multiplier.b = io_dip[1];
+        multiplier.a = auto.a;
+        multiplier.b = auto.b;
         io_led[0] = multiplier.out;  
         
       6b111111: //absolute value mode   
-        absolute.a = io_dip[2];
+        absolute.a = auto.a;
         io_led[0] = absolute.out;
                    
     }   
