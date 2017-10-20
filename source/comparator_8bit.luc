@@ -1,0 +1,25 @@
+module comparator_8bit (
+    //inputs from outputs of the 8 bit adder
+    input z, 
+    input v,
+    input n, 
+    //6 bit input alufn, 110011 indicating equal, 110101 indicating less than, 110111 indicating less than or equal to
+    input alufn[6], 
+    //8bit output
+    output out[8] 
+  ) {
+
+  always {
+    //selecting alufn at index 2 and 1
+    case(alufn[2:1]){ 
+    //case when alufn = 110011, running equal function on a and b
+        2b01: out = c{7b0,z};
+    //case when alufn = 110101, running less than function on a and b respectively
+        2b10: out = c{7b0,n^v}; 
+    //case when alufn = 110111, running less than or equal to function on a and b respectively
+        2b11: out = c{7b0,z|(n^v)}; 
+    // default outputing 00000000
+        default: out = 8b0; 
+    }
+  }
+}

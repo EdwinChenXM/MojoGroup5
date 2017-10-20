@@ -1,0 +1,35 @@
+module adder_8bit (
+    input a[8], //8bit inputs of a and b
+    input b[8], 
+    input alufn[6], //6 bit input alufn, 000000 indicating addition, 000001 indicating substraction
+    output z, 
+    output v, 
+    output n, 
+    output out[8] //8bit output
+  ) {
+  sig s[8]; 
+  
+  always {
+    //alufn 000000 perform addition, alufn 000001 perform substraction
+    //v is true when the addition operation overflows (result is too large to be represented in 8 bits)
+    case(alufn[0]){
+      0: s = a + b;
+         v = (a[7]&b[7]&~s[7]) | (~a[7]&~b[7]&s[7]); 
+      1: s = a - b;
+         v = (a[7]&~b[7]&~s[7]) | (~a[7]&b[7]&s[7]); 
+      default: s = 0;
+               v = 0;
+    }
+  //z is true when the s outputs are all zero
+      z = ~|s; 
+  //n is true when the s is negative (msb of s = 1)
+      n = s[7]; 
+//outputing s
+    out = s;    
+    
+    
+    
+    
+
+  }
+}

@@ -1,0 +1,23 @@
+module shifter_8bit (
+    input alufn[6],  // ALU input
+    input a[8],      // original binary input
+    input b[8],      // b[2:0] are the selector inputs (1, 2, 4, 8 bits shift)
+    output out[8]  // shifted binary output
+  ) {
+      
+  always {
+      case(alufn[1:0]){
+        b00:  // shift left
+          out = a << b[2:0];
+      
+        b01:  // shift right
+          out = a >> b[2:0];
+        
+        b11:  // shift right with sign extension
+          out = $signed(a) >>> b[2:0]; 
+      
+        default:  // nothing happens
+          out = a;
+  }
+}
+}

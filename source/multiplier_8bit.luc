@@ -1,0 +1,56 @@
+module multiplier_8bit (
+  input a[8],     //8bit inputs of a and b
+  input b[8],
+  input alufn[6],       //6 bit input alufn, 000010 indicating multiplication
+  output z,  // whether the value has all 0's
+  output v,  // whether the value overflowed
+  output n,  // whether the value is negative
+  output out[8]  // output
+  ){
+  //s is the signal to store final result
+  sig s[8];
+  //pp represents partial product, we do a partial product on each digit 
+  //of b and sum them up 
+  sig pp0[8];
+  sig pp1[8];
+  sig pp2[8];
+  sig pp3[8];
+  sig pp4[8];
+  sig pp5[8];
+  sig pp6[8];
+  sig pp7[8];
+  sig s0[8];
+  sig s1[8];
+  sig s2[8];
+  sig s3[8];
+  sig s4[8];
+  sig s5[8];
+  
+  always {
+    //getting the partial products by "and"
+    pp0 = a & 8x{b[0]};
+    pp1 = (a & 8x{b[1]}) << 1;
+    pp2 = (a & 8x{b[2]}) << 2;
+    pp3 = (a & 8x{b[3]}) << 3;
+    pp4 = (a & 8x{b[4]}) << 4;
+    pp5 = (a & 8x{b[5]}) << 5;
+    pp6 = (a & 8x{b[6]}) << 6;
+    pp7 = (a & 8x{b[7]}) << 7;
+    //doing plus one by one, actually only the last step "s = s5 + s7" needs
+    //to be separated so that we could use the same expression
+    //for v as that in adder_8bit
+    s0 = pp0 + pp1;
+    s1 = s0 + pp2;
+    s2 = s1 + pp3;
+    s3 = s2 + pp4;
+    s4 = s3 + pp5;
+    s5 = s4 + pp6;
+    s = s5 + pp7;
+    //final outputs
+    z = ~|s;
+    n = s[7];
+    v = (s5[7]&pp7[7]&~s[7]) | (~s5[7]&~pp7[7]&s[7]);
+    out = s;
+    }
+  
+  }

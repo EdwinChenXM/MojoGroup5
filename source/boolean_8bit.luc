@@ -1,0 +1,32 @@
+module boolean_8bit (
+    input alufn[6],    // ALU input
+    input a[8],
+    input b[8],        // selector inputs
+    output out[8]  // boolean output
+  ) {
+    var x;             // bit result for boolean output
+    var i;             // bit count for selector input
+  
+  always {
+    for (i = 0; i < 8; i++){  // for each bit of the selector inputs
+      x = a[i] * 2 + b[i];
+    
+      case(x){         // boolean calculation for bit i
+        b00:    // z = d0 when s0 = 0, s1 = 0
+          out[i] = alufn[0];
+      
+        b10:    // z = d1 when s0 = 1, s1 = 0
+          out[i] = alufn[1];
+    
+        b01:    // z = d2 when s0 = 0, s1 = 1
+          out[i] = alufn[2];
+          
+        b11:    // z = d3 when s0 = 1, s1 = 1
+          out[i] = alufn[3];
+            
+        default:  // in case things go wrong
+          out[i] = alufn[0];
+      }
+    }
+  }
+  }

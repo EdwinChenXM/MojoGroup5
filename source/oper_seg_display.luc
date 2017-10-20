@@ -1,0 +1,52 @@
+module oper_seg_display (
+    input clk,
+    input rst,
+    input alufn[6],
+    output oper[4][7]  // LED segments
+  ) {
+  
+  always {
+    case(alufn[5:0]){
+      b000000:  // add
+        oper = {7b0, 7b1110111, 7b1011110, 7b1011110};
+        
+      b000001:  // sub
+        oper = {7b0, 7b1101101, 7b0111110, 7b1111100};
+        
+      b011000:  // and
+        oper = {7b0, 7b1110111, 7b0110111, 7b1011110};
+      
+      b011110:  // or
+        oper = {7b0, 7b0, 7b1011100, 7b1010000};
+       
+      b010110:  // xor
+        oper = {7b0, 7b1110110, 7b1011100, 7b1010000};
+        
+      b011010:  // ldr
+        oper = {7b0, 7b0111000, 7b1011110, 7b1010000};
+      
+      b100000:  // shl
+        oper = {7b0, 7b1101101, 7b1110100, 7b0111000};
+        
+      b100001:  // shr
+        oper = {7b0, 7b1101101, 7b1110100, 7b1010000};
+        
+      b100011:  // sra
+        oper = {7b0, 7b1101101, 7b1010000, 7b1110111};
+        
+      b110011:  // cmpeq
+        oper = {7b0, 7b0, 7b1111001, 7b1100111};
+        
+      b110101:  // cmplt
+        oper = {7b0, 7b0, 7b0111000, 7b1000100};
+        
+      b110111:  // cmple
+        oper = {7b0, 7b0, 7b0111000, 7b1111001};
+      
+      default:  // no operation
+        oper = {7b1111111, 7b1111111, 7b1111111, 7b1111111};
+  }
+                   // select the value for the active digit and output the decoded value
+
+    }
+}

@@ -1,0 +1,198 @@
+module mojo_top (
+    input clk,              // 50MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input cclk,             // configuration clock, AVR ready when high
+    output spi_miso,        // AVR SPI MISO
+    input spi_ss,           // AVR SPI Slave Select
+    input spi_mosi,         // AVR SPI MOSI
+    input spi_sck,          // AVR SPI Clock
+    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    input avr_tx,           // AVR TX (FPGA RX)
+    output avr_rx,          // AVR RX (FPGA TX)
+    input avr_rx_busy,      // AVR RX buffer full
+    output io_led [3][8],   // LEDs on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield
+    output io_sel [4],      // Digit select on IO Shield
+    input io_button [5],    // 5 buttons on IO Shield
+    input io_dip [3][8]   // DIP switches on IO Shield
+  
+    
+  ) {
+  
+  sig rst;                  // reset signal
+  sig alufn[6];
+  
+  .clk(clk) {
+
+    .rst(rst){   
+    multi_seven_seg seg;
+    oper_seg_display oper_seg;
+   
+    }
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+      
+  }
+
+  adder_8bit adder;
+  comparator_8bit comparator;
+  boolean_8bit boolean;
+  shifter_8bit shifter;
+  multiplier_8bit multiplier;
+  absolute_8bit absolute;
+  
+  always {
+  
+    reset_cond.in = ~rst_n; // input raw inverted reset signal
+    rst = reset_cond.out;   // conditioned reset
+    
+    led = 8h00;             // turn LEDs off
+    spi_miso = bz;          // not using SPI
+    spi_channel = bzzzz;    // not using flags
+    avr_rx = bz;            // not using serial port
+    
+    io_led = 3x{{8h00}};    // turn LEDs off
+    io_seg = 8hff;          // turn segments off
+    io_sel = 4hf;           // select no digits
+
+    alufn = io_dip[0][5:0]; //alufn values taken from 6 switches
+    io_led[1] = alufn;      
+    //assigning alufn values
+    adder.alufn = alufn; 
+    comparator.alufn = alufn;
+    boolean.alufn = alufn;
+    shifter.alufn = alufn;
+    multiplier.alufn = alufn;
+        
+    //7 segments LED
+    oper_seg.alufn = alufn[5:0];
+    seg.values = oper_seg.oper;
+    
+    io_seg = ~seg.seg; // connect segments to the driver
+    io_sel = ~seg.sel; // connect digit select to the driver   
+        
+    //pre-defining input values from different imported modules
+    adder.a = 0;
+    adder.b = 0;
+    comparator.z = adder.z;
+    comparator.v = adder.v;
+    comparator.n = adder.n;
+    boolean.a = 0;
+    boolean.b = 0;
+    shifter.a = 0;
+    shifter.b = 0;
+    multiplier.a = 0;
+    multiplier.b = 0; 
+    absolute.a = 0;  
+    
+   /*
+    Simple Notes:           
+      io_dip[2] dedicated for A input
+      io_dip[1] dedicated for B input
+      io_led[0] dedicated for output of the function selected
+      led[0] dedicated for z, if any
+      led[2] dedicated for v, if any 
+      led[4] dedicated for n, if any 
+   */
+    
+    
+    case(alufn[5:0]){
+      6b000000: //adder addition mode
+        adder.a = io_dip[2];
+        adder.b = io_dip[1];
+        io_led[0] = adder.out;
+        led[0] = adder.z; 
+        led[2] = adder.v;
+        led[4] = adder.n;
+        
+      6b000001: //adder substraction mode
+        adder.a = io_dip[2];
+        adder.b = io_dip[1];
+        io_led[0] = adder.out; 
+        led[0] = adder.z; 
+        led[2] = adder.v;
+        led[4] = adder.n;
+        
+      6b110011: //compare equal mode
+        adder.a = io_dip[2][7:0];
+        adder.b = io_dip[1][7:0];
+        comparator.z = adder.z;
+        comparator.v = adder.v;
+        comparator.n = adder.n;
+        led[0] = adder.z;
+        led[2] = adder.v;
+        led[4] = adder.n;
+        io_led[0] = comparator.out;
+        
+                
+      6b110101: //compare less than mode
+        adder.a = io_dip[2];
+        adder.b = io_dip[1];
+        comparator.z = adder.z;
+        comparator.v = adder.v;
+        comparator.n = adder.n;
+        led[0] = adder.z; 
+        led[2] = adder.v;
+        led[4] = adder.n;
+        io_led[0] = comparator.out; 
+           
+      6b110111: //compare less than or equal to mode
+        adder.a = io_dip[2];
+        adder.b = io_dip[1];
+        comparator.z = adder.z;
+        comparator.v = adder.v;
+        comparator.n = adder.n;
+        led[0] = adder.z; 
+        led[2] = adder.v;
+        led[4] = adder.n;
+        io_led[0] = comparator.out;        
+        
+      6b011000: //boolean AND mode   
+        boolean.a = io_dip[2];
+        boolean.b = io_dip[1];
+        io_led[0] = boolean.out;    
+        
+      6b011110: //boolean OR mode   
+        boolean.a = io_dip[2];
+        boolean.b = io_dip[1];
+        io_led[0] = boolean.out; 
+        
+      6b010110: //boolean XOR mode   
+        boolean.a = io_dip[2];
+        boolean.b = io_dip[1];
+        io_led[0] = boolean.out; 
+        
+      6b011010: //boolean "A" (LDR) mode   
+        boolean.a = io_dip[2];
+        boolean.b = io_dip[1];
+        io_led[0] = boolean.out;         
+        
+      6b100000: //shif left mode                
+        shifter.a = io_dip[2]; 
+        shifter.b = io_dip[1];
+        io_led[0] = shifter.out;
+        
+      6b100001: //shif right mode                
+        shifter.a = io_dip[2]; 
+        shifter.b = io_dip[1];
+        io_led[0] = shifter.out; 
+        
+      6b100011: //shif right with sign extension mode                
+        shifter.a = io_dip[2]; 
+        shifter.b = io_dip[1];
+        io_led[0] = shifter.out;    
+        
+      6b000010: //multiplier between A and B 
+        multiplier.a = io_dip[2];
+        multiplier.b = io_dip[1];
+        io_led[0] = multiplier.out;  
+        
+      6b111111: //absolute value mode   
+        absolute.a = io_dip[2];
+        io_led[0] = absolute.out;
+                   
+    }   
+   }
+  }
